@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova - AI Robot Assistant</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, #0f172a, #020617);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* কর্নারে ভাসমান রোবট গার্ল অবতার */
+        #floating-robot-container {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
+            animation: float 3s ease-in-out infinite;
+            z-index: 1000;
+            overflow: hidden;
+            border: 3px solid #38bdf8;
+            background: #000;
+        }
+
+        #floating-robot-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* চ্যাট এবং ভয়েস কন্ট্রোল বক্স */
+        #assistant-box {
+            position: absolute;
+            bottom: 160px;
+            right: 30px;
+            width: 350px;
+            height: 480px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #38bdf8;
+            border-radius: 20px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            z-index: 1001;
+            backdrop-filter: blur(15px);
+        }
+
+        .box-header {
+            padding: 15px;
+            background: linear-gradient(90deg, #0284c7, #38bdf8);
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .msg.bot {
+            background: rgba(56, 189, 248, 0.15);
+            color: #7dd3fc;
+            align-self: flex-start;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .msg.user {
+            background: #0284c7;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .control-panel {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-row input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .input-row button {
+            background: #38bdf8;
+            border: none;
+            padding: 0 14px;
+            border-radius: 8px;
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .voice-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="padding: 40px; text-align: center;">
+        <h1>আপনার প্রিমিয়াম রোবট অ্যাসিস্ট্যান্ট "নোভা" তৈরি!</h1>
+        <p>কর্নারে থাকা রোবট আইকনে ক্লিক করে ভয়েস বা টেক্সটে কথা বলুন।</p>
+    </div>
+
+    <!-- কর্নারে ভাসমান রোবট গার্ল -->
+    <div id="floating-robot-container" onclick="toggleBox()">
+        <img src="https://creator.nightcafe.studio/jobs/cpreHBEfDKKtEU9tT8bv/cpreHBEfDKKtEU9tT8bv--0--brpse.jpg" alt="Robot Girl">
+    </div>
+
+    <!-- চ্যাট ও ভয়েস কন্ট্রোল বক্স -->
+    <div id="assistant-box">
+        <div class="box-header">
+            <span>নোভা (রোবট ফ্রেন্ড)</span>
+            <button class="close-btn" onclick="toggleBox()">✕</button>
+        </div>
+        <div class="chat-area" id="chatArea">
+            <div class="msg bot">হ্যালো বন্ধু! আমি নোভা। তোমার পার্সোনাল এআই রোবট। বলো, আজকে তোমাকে কীভাবে সাহায্য করব? 😊</div>
+        </div>
+        <div class="control-panel">
+            <button class="voice-btn" onclick="startVoiceCommand()">🎙️ ভয়েস কমান্ড দিন (কথা বলুন)</button>
+            <div class="input-row">
+                <input type="text" id="textInput" placeholder="অথবা এখানে লিখে পাঠান..." onkeypress="handleKey(event)">
+                <button onclick="sendText()">পাঠাও</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleBox() {
+            const box = document.getElementById('assistant-box');
+            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function speakText(text) {
+            // ব্রাউজারের নিজস্ব ভয়েস সিন্থেসিস ব্যবহার করে বাংলায় কথা বলানোর জন্য
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'bn-BD'; // বাংলা ভাষা সেট করা
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function handleResponse(userText) {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML += `<div class="msg user">${userText}</div>`;
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "আমি তোমার কথা একদম বুঝতে পেরেছি বন্ধু! বলো আর কী করতে হবে?";
+                if(userText.includes('কেমন') || userText.includes('আছো')) {
+                    reply = "আমি একদম দারুণ আছি! তোমার সাথে কথা বলে আমার খুব ভালো লাগছে।";
+                } else if(userText.includes('নাম')) {
+                    reply = "আমার নাম নোভা, তোমার ফিউচারিস্টিক এআই রোবট বন্ধু!";
+                }
+                
+                chatArea.innerHTML += `<div class="msg bot">${reply}</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+                
+                // রোবট নিজে মুখে কথা বলে উত্তর দেবে
+                speakText(reply);
+            }, 1000);
+        }
+
+        function sendText() {
+            const input = document.getElementById('textInput');
+            const text = input.value.trim();
+            if(!text) return;
+            input.value = '';
+            handleResponse(text);
+        }
+
+        function handleKey(e) {
+            if(e.key === 'Enter') sendText();
+        }
+
+        function startVoiceCommand() {
+            // ব্রাউজারের ভয়েস রিকগনিশন সাপোর্ট পরীক্ষা করা
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'bn-BD';
+                recognition.start();
+
+                recognition.onresult = function(event) {
+                    const speechToText = event.results[0][0].transcript;
+                    handleResponse(speechToText);
+                };
+            } else {
+                alert("আপনার ব্রাউজার ভয়েস রিকগনিশন সাপোর্ট করছে না। টাইপ করে ট্রাই করুন!");
+            }
+        }
+    </script>
+</body>
+</html>
